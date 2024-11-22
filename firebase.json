@@ -1,0 +1,24 @@
+{
+  "flutter": {
+    "platforms": {
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "toribu-44823",
+          "configurations": {
+            "web": "1:179189761346:web:3ba8ef7a90945b9d2c34db"
+          }
+        }
+      }
+    }
+  },
+  "emulators": {
+    "singleProjectMode": true,
+    "auth": {
+      "port": 9099
+    },
+    "ui": {
+      "enabled": true,
+      "port": 9000
+    }
+  }
+}
