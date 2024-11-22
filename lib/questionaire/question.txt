@@ -1,0 +1,217 @@
+import 'package:app2/centered_view.dart';
+import 'package:flutter/material.dart';
+
+class Questionaire extends StatefulWidget {
+  const Questionaire({super.key});
+
+  @override
+  State<Questionaire> createState() => _QuestionaireState();
+}
+
+class _QuestionaireState extends State<Questionaire> {
+  int _currentStep = 0;
+  final _formKeys = List.generate(3, (_) => GlobalKey<FormState>());
+  
+  // Form data
+  String? gender;
+  String? ageGroup;
+  List<String> interests = [];
+  String? experience;
+  String? preferredTime;
+  
+  final List<String> interestOptions = [
+    'Reading',
+    'Exercise',
+    'Cooking',
+    'Travel',
+    'Technology',
+    'Music'
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Profile Questionnaire'),
+        centerTitle: true,
+      ),
+      body: Theme(
+        data: Theme.of(context).copyWith(
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: Colors.blue,
+            primary: Colors.blue,
+          ),
+        ),
+        child: Stepper(
+          type: StepperType.horizontal,
+          currentStep: _currentStep,
+          onStepContinue: () {
+            if (_currentStep < 2) {
+              if (_formKeys[_currentStep].currentState?.validate() ?? false) {
+                _formKeys[_currentStep].currentState?.save();
+                setState(() => _currentStep++);
+              }
+            } else {
+              // Handle questionnaire completion
+              _submitQuestionnaire();
+            }
+          },
+          onStepCancel: () {
+            if (_currentStep > 0) {
+              setState(() => _currentStep--);
+            }
+          },
+          steps: [
+            Step(
+              title: const Text('Basic Info'),
+              content: Form(
+                key: _formKeys[0],
+                child: CenteredView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Gender:', style: TextStyle(fontSize: 16)),
+                    Row(
+                      children: [
+                        Radio<String>(
+                          activeColor: Colors.amber,
+                          value: 'Male',
+                          groupValue: gender,
+                          onChanged: (value) => setState(() => gender = value),
+                        ),
+                        const Text('Male'),
+                        Radio<String>(
+                          value: 'Female',
+                          groupValue: gender,
+                          onChanged: (value) => setState(() => gender = value),
+                        ),
+                        const Text('Female'),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    DropdownButtonFormField<String>(
+                      decoration: const InputDecoration(
+                        labelText: 'Age Group',
+                        border: OutlineInputBorder(),
+                      ),
+                      value: ageGroup,
+                      items: ['18-25', '26-35', '36-45', '46+']
+                          .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                          .toList(),
+                      onChanged: (value) => setState(() => ageGroup = value),
+                      validator: (value) =>
+                          value == null ? 'Please select age group' : null,
+                    ),
+                  ],
+                ),
+              ),
+              ),
+            ),
+            Step(
+              title: const Text('Interests'),
+              content: Form(
+                key: _formKeys[1],
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Select your interests:',
+                        style: TextStyle(fontSize: 16)),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      children: interestOptions
+                          .map(
+                            (interest) => FilterChip(
+                              label: Text(interest),
+                              selected: interests.contains(interest),
+                              onSelected: (selected) {
+                                setState(() {
+                                  if (selected) {
+                                    interests.add(interest);
+                                  } else {
+                                    interests.remove(interest);
+                                  }
+                                });
+                              },
+                            ),
+                          )
+                          .toList(),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Step(
+              title: const Text('Preferences'),
+              content: Form(
+                key: _formKeys[2],
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    DropdownButtonFormField<String>(
+                      decoration: const InputDecoration(
+                        labelText: 'Experience Level',
+                        border: OutlineInputBorder(),
+                      ),
+                      value: experience,
+                      items: ['Beginner', 'Intermediate', 'Advanced']
+                          .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                          .toList(),
+                      onChanged: (value) => setState(() => experience = value),
+                      validator: (value) =>
+                          value == null ? 'Please select experience level' : null,
+                    ),
+                    const SizedBox(height: 16),
+                    DropdownButtonFormField<String>(
+                      decoration: const InputDecoration(
+                        labelText: 'Preferred Time',
+                        border: OutlineInputBorder(),
+                      ),
+                      value: preferredTime,
+                      items: ['Morning', 'Afternoon', 'Evening']
+                          .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                          .toList(),
+                      onChanged: (value) => setState(() => preferredTime = value),
+                      validator: (value) =>
+                          value == null ? 'Please select preferred time' : null,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _submitQuestionnaire() {
+    // Add your submission logic here
+    if (_formKeys[2].currentState?.validate() ?? false) {
+      _formKeys[2].currentState?.save();
+      // Process the collected data
+      print('Questionnaire Submitted:');
+      print('Gender: $gender');
+      print('Age Group: $ageGroup');
+      print('Interests: $interests');
+      print('Experience: $experience');
+      print('Preferred Time: $preferredTime');
+      
+      // Show success message
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Questionnaire submitted successfully!')),
+      );
+    }
+  }
+}
+
+void main() {
+  runApp(const MaterialApp(
+    debugShowCheckedModeBanner: false,
+    
+    home: Scaffold(
+      body: Questionaire(),
+      backgroundColor: Colors.white,
+    ),
+  ));
+}
